@@ -1,0 +1,217 @@
+<template>
+    <lightning-card title="Online Exam" icon-name="custom:custom16">
+        <template if:true={started}>
+
+            <lightning-layout class="slds-var-p-around_medium">
+                <lightning-layout-item size="12">
+                    <lightning-input required="true" placeholder="Student Name" label="Enter Student Name" value={studentName} onchange={handleChange}></lightning-input>
+                </lightning-layout-item>
+            </lightning-layout>
+            <lightning-layout class="slds-var-p-around_medium slds-align_absolute-center">
+              <lightning-button label="Proceed" variant="brand" onclick={handleProceed}></lightning-button>
+          </lightning-layout>
+  
+
+        </template>
+        <template if:true={proceed}>
+          <lightning-layout class="slds-var-p-around_small ">
+            <p style="font-weight: bolder; font-size:40px;">Exam Instruction</p>
+          </lightning-layout>
+          <lightning-layout class="slds-var-p-around_small ">
+          <ul class="slds-list_dotted" style="font-size:20px">
+            <li>You must use a functioning webcam and microphone</li>
+            <li>No cell phones or other secondary devices in the room or test area</li>
+            <li>Your desk/table must be clear or any materials except your test-taking device</li>
+            <li>No one else can be in the room with you</li>
+            <li>No talking</li>
+            <li>The testing room must be well-lit and you must be clearly visible</li>
+            <li>No dual screens/monitors</li>
+            <li>Do not leave the camera </li>
+            <li>No use of additional applications or internet</li>
+            
+          </ul>
+        </lightning-layout>
+          <lightning-layout class="slds-var-p-around_medium ">
+          
+              
+                <input type="checkbox"  onclick={handleCheckbox} class="slds-var-p-around_small wef">
+              
+              
+                <p class="slds-var-p-left_small ">I accept all the terms and conditoins</p>
+              
+            
+             
+        </lightning-layout>
+
+          <lightning-layout class="slds-var-p-around_medium slds-align_absolute-center">
+            <lightning-button label="Start Exam" variant="brand" onclick={handleStart}></lightning-button>
+        </lightning-layout>
+
+        </template>
+        
+        <!-- timer template -->
+        <template if:true={showTimer}>
+            
+                <p class="slds-align_absolute-center slds-p-horizontal_large"  style="background-color:rgb(250, 101, 126); font-weight: bolder; font-size:20px;">
+                    Time Left: {timeVal}</p>
+            
+        </template>
+
+          <!-- main template -->
+        <template if:true={start}>
+            <lightning-layout size="12">
+                <lightning-layout-item size="6">
+                    <p style="font-size:40px"> Hello {studentName}</p>
+                    
+
+                <template for:each={questionFormat} for:item="ques">
+                    <div class="slds-var-p-around_medium slds-text-align_left" key={ques.Id}>{ques.question.Question__c}</div>
+                    
+                    <template for:each={ques.options} for:item="opt" for:index="index">
+                        <lightning-layout key={opt.label} class="slds-p-left_large slds-p-top_large">
+                            
+                            <lightning-layout-item>
+                              <template if:false={opt.selectedvalue}>
+                                <input type="radio"   value={opt.value} name={ques.question.Id} data-id={ques.question.Id}   onclick={HandleClick} ></input>
+                              </template>
+          
+                              <template if:true={opt.selectedvalue}>
+                                <input type="radio"  value={opt.value} name={ques.question.Id} data-id={ques.question.Id} checked onclick={HandleClick} ></input>
+                              </template>                     
+                            </lightning-layout-item>
+                            <lightning-layout-item class="slds-p-left_small" data-id={ques.question.Id}>
+                              {opt.label}
+                            </lightning-layout-item>
+                        </lightning-layout>
+    
+                    </template> 
+                    <div  key={ques.Id} class="slds-docked-form-footer">
+
+                      <span class="slds-p-around_large ">
+                          <template if:true={pbtn}>
+                          <lightning-button label="Previous" variant="Brand" onclick={handlePev}>
+                          </lightning-button>
+                      </template>
+                      </span>
+          
+                      <span class=" slds-p-around_large">
+                          <template if:true={nbtn}>
+                          <lightning-button label="Next" variant="Brand" onclick={handleNext}>
+                          </lightning-button>
+                      </template>
+                      </span>
+          
+                      <span class=" slds-p-around_large">
+                        <template if:false={ques.selectedAnswer}>
+                          <lightning-button label={mlabel}   variant="Brand" onclick={marked}> </lightning-button>
+                        </template>
+                      </span>
+          
+                      <span class=" slds-p-around_large">
+                          <lightning-button label="Submit" variant="destructive" onclick={handleSubmit}>
+                          </lightning-button>
+                      </span>
+                  </div>   
+                </template>
+            </lightning-layout-item >
+            <lightning-layout-item size="6"   class="slds-p-top_x-large">
+                <lightning-layout size="12" >
+                    <lightning-layout-item size="5"></lightning-layout-item>
+                    <lightning-layout-item size="6">
+                      <div class="slds-grid slds-wrap slds-align_right" style="max-width:300px; max-height:300px; background-color:gainsboro; color:black">
+                        <template for:each={completeRecord} for:item="ques" for:index="index">
+                          <div key={ques.Id}  class="slds-p-around_small slds-size_3-of-12" >
+                          <lightning-button   data-id="adobeSignBtn" label={ques.qNo} variant={ques.buttonVariant}  onclick={handleReviewBtnClick}></lightning-button> 
+                        </div>
+                        </template>
+                      </div>
+                    </lightning-layout-item>
+                    <!-- <lightning-layout-item size="6">
+                      
+                    </lightning-layout-item> -->
+                  </lightning-layout>
+            </lightning-layout-item>
+            </lightning-layout>
+            
+        </template>
+
+        <!-- review section -->
+        <template if:true={review}>
+            <lightning-card title="Review Panel">
+                <lightning-layout size="12" >
+                    <lightning-layout-item size="2"></lightning-layout-item>
+                    <lightning-layout-item size="4">
+                      <div class="slds-grid slds-wrap slds-align_right" style="max-width:300px; max-height:300px; background-color:gainsboro; color:black">
+                        <template for:each={records} for:item="ques" for:index="index">
+                          <div key={ques.Id}  class="slds-p-around_small slds-size_3-of-12" >
+                          <lightning-button   data-id="adobeSignBtn" label={ques.qNo} variant={ques.buttonVariant}  onclick={handleReviewBtnClick}></lightning-button> 
+                        </div>
+                        </template>
+                      </div>
+                    </lightning-layout-item>
+                    <lightning-layout-item >
+                      <div class="slds-var-p-around_medium  ">
+                        <p class="slds-text-heading_medium" style="font-weight: 500;">Answered : {Answered}<br>Unanswered : {unAnswered}</p>
+                      </div>
+                    </lightning-layout-item>
+                  </lightning-layout>
+
+               
+                <lightning-layout>
+                    <lightning-layout-item size="2"></lightning-layout-item>
+                <lightning-layout-item size="7"  class="slds-p-around_x-large">
+                    <lightning-button label="Back" variant="brand" onclick={back}></lightning-button>
+                </lightning-layout-item>
+                <lightning-layout-item class="slds-p-around_large">
+                    <lightning-button label="Final Submit" variant="brand" onclick={final} ></lightning-button>
+                </lightning-layout-item>
+                </lightning-layout>
+                </lightning-card>
+        </template>
+
+        <!-- Result Section -->
+        <template if:true={result}>
+            <lightning-card title="Appcino Pvt Ltd" icon-name="standard:user"></lightning-card>
+            <lightning-card title="Result" icon-name="standard:outcome"></lightning-card>
+            <lightning-card title="Done" icon-name="standard:unified_health_score"></lightning-card>
+
+            <div style="padding:5px">
+                <p style="background-color:rgb(48, 45, 46); font-weight: bolder; font-size:20px; color:aliceblue; text-align:center;">Your Score: {percentage}% <br> {pf}</p>
+            </div>
+            <lightning-button label="Show Answer" variant="Brand" onclick={showAnswer}></lightning-button>
+            <template if:true={showA}>
+              <template for:each={records} for:item="data">
+                <lightning-card key={data.Id} class=" slds-p-top_large">
+                <div class="slds-var-p-around_medium slds-text-align_left slds-text-heading_medium " style="font-size: 15px;" >{data.question.Question__c}</div>
+                    
+                    <template for:each={data.options} for:item="opt" for:index="index">
+                        <lightning-layout key={opt.label} class="slds-p-left_large slds-p-top_large">
+                            
+                           
+                            <lightning-layout-item class="slds-p-left_small" data-id={data.question.Id}>
+                              <template if:true={opt.selectedvalue}>
+                                <template if:true={opt.marked}>
+                                  <div style="color:rgb(4, 104, 42); border:1px solid rgb(0, 255, 98) ">{opt.label} &#x2705;</div>
+                                </template>
+                                <template if:false={opt.marked}>
+                                  <div style="color:rgb(248, 14, 14); border:1px solid rgb(243, 114, 114)">{opt.label} &#10060;</div>
+                                </template>
+                              </template>
+                              <template if:false={opt.selectedvalue}>
+                                <div>{opt.label}  </div>
+                              </template>
+                            </lightning-layout-item>
+                        </lightning-layout>
+
+                        
+                    </template> 
+                <div class="slds-p-left_large slds-p-top_large slds-text-heading_medium" style="font-weight: bolder;" > correct Answer: {data.question.Answer__c}</div>
+              </lightning-card>    
+              </template>
+            </template>
+        </template>
+
+
+    </lightning-card>
+
+</template>
